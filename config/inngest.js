@@ -7,9 +7,8 @@ export const inngest = new Inngest({ id: "quickcart-next" });
 
 // now we create multiple function by clerk to use data to database
 export const syncUserCreation = inngest.createFunction(
-    {id : 'sync-user-from-clerk', },
-    {event : 'clerk/user.created'},
-    async({event})=>{
+    { id: 'sync-user-from-clerk', triggers: { event: 'clerk/user.created' } },
+    async ({ event }) => {
         const {id,first_name,last_name,image_url,email_addresses} = event.data;
         const userData = {
             _id:id,
@@ -26,9 +25,8 @@ export const syncUserCreation = inngest.createFunction(
 
 //Inngest function to update user data in database
 export const syncUserUpdation = inngest.createFunction(
-    {id : 'update-user-from-clerk' },
-    {event : 'clerk/user.updated'},
-    async({event})=>{
+    { id: 'update-user-from-clerk', triggers: { event: 'clerk/user.updated' } },
+    async ({ event }) => {
         const {id,first_name,last_name,image_url,email_addresses} = event.data;
         const userData = {
             _id:id,
@@ -44,9 +42,8 @@ export const syncUserUpdation = inngest.createFunction(
 
 //inest to delete user data from database when user is deleted from clerk
 export const syncUserDeletion = inngest.createFunction(
-    {id : 'delete-user-with-clerk' },
-    {event : 'clerk/user.deleted'},
-    async({event})=>{
+    { id: 'delete-user-with-clerk', triggers: { event: 'clerk/user.deleted' } },
+    async ({ event }) => {
         const {id} = event.data;
         // now we will delete this data from the database
         await connectDB()
