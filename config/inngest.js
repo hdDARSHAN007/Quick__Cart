@@ -2,7 +2,7 @@
 import { Inngest } from "inngest";
 import connectDB from "./db";
 import User from "../models/User";
-import Orders from "../models/Orders";
+import Orders from "../models/Order";
 
 
 export const inngest = new Inngest({ id: "quickcart-next" });
@@ -59,13 +59,13 @@ export const syncUserDeletion = inngest.createFunction(
 export const createUserOrder = inngest.createFunction(
     { 
         id: 'create-order-from-frontend',
+        triggers: { event: 'order/created' },
         batchEvents:{
             maxSize :25,
             timeout : '5s'
         }
 
     },
-    {event : 'order/created' },
     async ({event})=>{
         const orders = event.map((event) => {
             return {
