@@ -1,17 +1,33 @@
 import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 const OrderSummary = () => {
 
-  const { currency, router, getCartCount, getCartAmount } = useAppContext()
+  const { currency, router, getCartCount, getCartAmount ,getToken,user,cartitem,setCartItems} = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [userAddresses, setUserAddresses] = useState([]);
 
+  // this functionality is to fetch user addresses from database and set it to state and show it in dropdown and user can select the address for delivery and also user can add new address by clicking on add new address button and it will redirect to add address page where user can add new address and after adding new address it will redirect to checkout page and show the newly added address in dropdown and user can select that address for delivery
   const fetchUserAddresses = async () => {
-    setUserAddresses(addressDummyData);
+    try{
+      const token = await getToken()
+      const {data} = await axios.get('/api/user/get-address',{headers : {Authorization : `Bearer ${token}`}})
+      if(data.success){
+        setUserAddresses(data.addresses)
+        if(data.addresses.length > 0){
+          setSelectedAddress(data.addresses[0])
+        }
+      }else{
+        toast.error(data.message)
+    }
+  }catch(error){
+    toast.error(error.message)
+  }
   }
 
   const handleAddressSelect = (address) => {
@@ -24,8 +40,10 @@ const OrderSummary = () => {
   }
 
   useEffect(() => {
-    fetchUserAddresses();
-  }, [])
+    if(user){
+      fetchUserAddresses()
+    }
+  }, [user])
 
   return (
     <div className="w-full md:w-96 bg-gray-500/5 p-5">
