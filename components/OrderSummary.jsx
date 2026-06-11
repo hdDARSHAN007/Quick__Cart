@@ -1,12 +1,12 @@
-import { addressDummyData } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
+
 const OrderSummary = () => {
 
-  const { currency, router, getCartCount, getCartAmount ,getToken,user,cartitem,setCartItems} = useAppContext()
+  const { currency, router, getCartCount, getCartAmount ,getToken,user,cartItems,setCartItems} = useAppContext()
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -36,6 +36,40 @@ const OrderSummary = () => {
   };
 
   const createOrder = async () => {
+    try{
+      if(!selectedAddress){
+        return toast.error("Please select an address for delivery")
+      }
+      let cartItemsArray = Object.keys(cartItems).map((key)=>({product:key,quantity : cartItems[key]}))
+      // to remove unessary fields from cart items array and only keep product id and quantity
+      cartItemsArray = cartItemsArray.filter((item) => item.quantity > 0)
+
+      if(cartItemsArray.length === 0){
+        return toast.error("Please add some items to cart before placing order")
+      }
+
+      const token = await getToken()
+
+      const {data} = await axios.post('/api/Order/create',{
+        address : selectedAddress._id,
+        items : cartItemsArray,
+      },{
+        headers:{Authorization : `Bearer ${token}`}
+      })
+
+      if(data.success){
+        toast.success(data.message)
+        setCartItems({})
+        router.push('/order-placed')
+      }else{
+        toast.error(data.message)
+      }
+
+
+
+    }catch(error){
+      toast.error(error.message)
+    }
 
   }
 

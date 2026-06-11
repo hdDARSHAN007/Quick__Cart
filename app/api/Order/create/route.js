@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 import Product from "@/models/Product";
 import User from "@/models/User";
 import { inngest } from "@/config/inngest";
-
-
+import Order from "@/models/Order";
 
 export async function POST(request){
     try{
@@ -19,12 +18,32 @@ export async function POST(request){
         }
 
         //calculate amt using items
-        const amount = await items.reduce(async (acc,item)=>{
-            const product = await Product.findById(item.productId)
-        
-                return acc + (product.offerprice * item.quantity)
-        
-        },0)
+       let amount = 0;
+
+for (const item of items) {
+    const product = await Product.findById(item.product);
+
+    if (!product) {
+        return NextResponse.json({
+            success: false,
+            message: `Product not found: ${item.product}`
+        });
+    }
+
+    amount += product.offerPrice * item.quantity;
+}
+
+        //create order in DB
+        await Order.create({
+    userId,
+    address,
+    items: items.map(item => ({
+        productId: item.product,
+        quantity: item.quantity
+    })),
+    amount: amount + Math.floor(amount * 0.02),
+    date: new Date()
+});
 
         await inngest.send({
             name : "order/created",
