@@ -7,7 +7,7 @@ import Image from "next/image";
 
 const Navbar = () => {
 
-  const { isSeller, router } = useAppContext();
+  const { isSeller, router, getCartCount } = useAppContext();
 
   return (
     <nav className="flex items-center justify-between px-6 md:px-16 lg:px-32 py-3 border-b border-gray-300 text-gray-700">
@@ -24,10 +24,10 @@ const Navbar = () => {
         <Link href="/all-products" className="hover:text-gray-900 transition">
           Shop
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/about" className="hover:text-gray-900 transition">
           About Us
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/contact" className="hover:text-gray-900 transition">
           Contact
         </Link>
 
@@ -41,6 +41,14 @@ const Navbar = () => {
           <Image src={assets.user_icon} alt="user icon" />
           Account
         </button>
+        <Link href="/cart" className="relative flex items-center hover:text-gray-900 transition">
+          <Image className="w-5 h-5" src={assets.cart_icon} alt="cart icon" />
+          {getCartCount() > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-orange-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-semibold">
+              {getCartCount()}
+            </span>
+          )}
+        </Link>
       </ul>
 
       <div className="flex items-center md:hidden gap-3">
@@ -49,6 +57,14 @@ const Navbar = () => {
           <Image src={assets.user_icon} alt="user icon" />
           Account
         </button>
+        <Link href="/cart" className="relative flex items-center hover:text-gray-900 transition">
+          <Image className="w-5 h-5" src={assets.cart_icon} alt="cart icon" />
+          {getCartCount() > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-orange-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-semibold">
+              {getCartCount()}
+            </span>
+          )}
+        </Link>
       </div>
     </nav>
   );
