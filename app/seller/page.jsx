@@ -1,9 +1,12 @@
 'use client'
 import React, { useState } from "react";
 import { assets } from "@/assets/assets";
+import { useAppContext } from "@/context/AppContext";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 import Image from "next/image";
-
 const AddProduct = () => {
+  const {getToken} = useAppContext()
 
   const [files, setFiles] = useState([]);
   const [name, setName] = useState('');
@@ -14,6 +17,51 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // we can send this data to our API route and persist it to DB
+    const formData = new FormData();
+
+    formData.append('name',name)
+    formData.append('description',description)
+    formData.append('category',category)
+    formData.append('price',price)
+    formData.append('offerPrice',offerPrice)
+    // data added to formData, now we can add files to it
+    // backend expects files under the field name 'file'
+    let filesAppended = 0;
+    for(let i=0; i<files.length; i++){
+      if(files[i]){
+        formData.append('file', files[i]);
+        filesAppended++;
+      }
+    }
+
+    if(filesAppended === 0){
+      toast.error('Please upload at least one image');
+      return;
+    }
+
+    // now call API
+    try{
+      const token = await getToken()
+      const {data } = await axios.post('/api/product/add',formData,{headers : { Authorization : `Bearer ${token}` }})
+
+      if(data.success){
+        toast.success(data.message || 'Upload successfully')
+        // Reset form fields
+        setFiles([]);
+        setName('');
+        setDescription('');
+        setCategory('Earphone');
+        setPrice('');
+        setOfferPrice('');
+      }else{
+          toast.error(data.message)
+      }
+
+    } catch (error) {
+      toast.error(error.message)
+
+    }
 
   };
 
@@ -38,6 +86,7 @@ const AddProduct = () => {
                   alt=""
                   width={100}
                   height={100}
+                  unoptimized={true}
                 />
               </label>
             ))}
@@ -84,7 +133,7 @@ const AddProduct = () => {
               id="category"
               className="outline-none md:py-2.5 py-2 px-3 rounded border border-gray-500/40"
               onChange={(e) => setCategory(e.target.value)}
-              defaultValue={category}
+              value={category}
             >
               <option value="Earphone">Earphone</option>
               <option value="Headphone">Headphone</option>
