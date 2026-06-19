@@ -9,7 +9,7 @@ import { useClerk, UserButton } from "@clerk/nextjs";
 
 const Navbar = () => {
 
-  const { isSeller, router,user } = useAppContext();
+  const { isSeller, router, getCartCount, user } = useAppContext();
   const {openSignIn} = useClerk();
 
   return (
@@ -27,10 +27,10 @@ const Navbar = () => {
         <Link href="/all-products" className="hover:text-gray-900 transition">
           Shop
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/about" className="hover:text-gray-900 transition">
           About Us
         </Link>
-        <Link href="/" className="hover:text-gray-900 transition">
+        <Link href="/contact" className="hover:text-gray-900 transition">
           Contact
         </Link>
 
@@ -62,16 +62,30 @@ const Navbar = () => {
           <Image src={assets.user_icon} alt="user icon" />
           Account
         </button>
+        <Link href="/cart" className="relative flex items-center hover:text-gray-900 transition">
+          <Image className="w-5 h-5" src={assets.cart_icon} alt="cart icon" />
+          {getCartCount() > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-orange-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-semibold">
+              {getCartCount()}
+            </span>
+          )}
+        </Link>
       }
       </ul>
 
       <div className="flex items-center md:hidden gap-3">
-        {
-          isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>
-        }
-          {
-            user ? 
-        <>
+        {isSeller && <button onClick={() => router.push('/seller')} className="text-xs border px-4 py-1.5 rounded-full">Seller Dashboard</button>}
+        
+        <Link href="/cart" className="relative flex items-center hover:text-gray-900 transition">
+          <Image className="w-5 h-5" src={assets.cart_icon} alt="cart icon" />
+          {getCartCount() > 0 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-orange-600 text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-semibold">
+              {getCartCount()}
+            </span>
+          )}
+        </Link>
+
+        {user ? (
           <UserButton>
             <UserButton.MenuItems>
               <UserButton.Action label="cart" labelIcon={<CartIcon />} onClick={() => router.push('/cart')} />
@@ -80,10 +94,12 @@ const Navbar = () => {
               <UserButton.Action label="My Orders" labelIcon={<BagIcon/>} onClick={()=> router.push('/my-orders')}/>
             </UserButton.MenuItems>
           </UserButton>
-        </>:<button onClick={openSignIn} className="flex items-center gap-2 hover:text-gray-900 transition">
+        ) : (
+          <button onClick={openSignIn} className="flex items-center gap-2 hover:text-gray-900 transition">
             <Image src={assets.user_icon} alt="user icon" />
-              Account
-            </button>}
+            Account
+          </button>
+        )}
       </div>
     </nav>
   );
